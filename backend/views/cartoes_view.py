@@ -8,6 +8,8 @@ class CartaoCreate(BaseModel):
     slug: str
     publicado: Optional[bool] = False
     falecido_id: Optional[str] = None
+    foto_path: Optional[str] = None
+    template_usado: Optional[str] = None
 
 class CartaoUpdate(BaseModel):
     titulo: Optional[str] = Field(None, min_length=2, max_length=100)
@@ -15,3 +17,5 @@ class CartaoUpdate(BaseModel):
     slug: Optional[str] = None
     publicado: Optional[bool] = None
     falecido_id: Optional[str] = None
+    foto_path: Optional[str] = None
+    template_usado: Optional[str] = None
