@@ -15,6 +15,7 @@ export default function EditorPlanos() {
   const [planos, setPlanos] = useState<Plano[]>([]);
   const [selId, setSelId] = useState<string | null>(null);
   const [edit, setEdit] = useState<Partial<Plano>>({});
+  const [valorMensalText, setValorMensalText] = useState("");
   const [beneficiosText, setBeneficiosText] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,12 +56,39 @@ export default function EditorPlanos() {
   const select = (p: Plano) => {
     setSelId(p.id);
     setEdit(p);
+    setValorMensalText(formatCurrency(p.valor_mensal));
     setBeneficiosText(toBeneficiosText(p.beneficios));
   };
   const novo = () => {
     setSelId(null);
     setEdit({ titulo: "", descricao: "", valor_mensal: 0, destaque: false, ativo: true, beneficios: {} });
+    setValorMensalText("");
     setBeneficiosText("");
+  };
+
+  const formatCurrency = (value: number) => {
+    const safeValue = Number.isFinite(value) ? value : 0;
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(safeValue);
+  };
+
+  const parseCurrency = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    if (!digits) return Number.NaN;
+    return Number(digits) / 100;
+  };
+
+  const handleValorMensalChange = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    if (!digits) {
+      setValorMensalText("");
+      return;
+    }
+    setValorMensalText(formatCurrency(Number(digits) / 100));
   };
 
   const salvar = async () => {
@@ -71,8 +99,9 @@ export default function EditorPlanos() {
         setSaving(false);
         return;
       }
-      if (Number(edit.valor_mensal ?? 0) < 0) {
-        toast.error("O valor mensal não pode ser negativo");
+      const valorMensal = parseCurrency(valorMensalText);
+      if (valorMensalText.trim().length < 1 || Number.isNaN(valorMensal) || valorMensal < 0) {
+        toast.error("Informe um valor mensal válido");
         setSaving(false);
         return;
       }
@@ -80,9 +109,10 @@ export default function EditorPlanos() {
         titulo: edit.titulo!, descricao: edit.descricao!, valor_mensal: Number(edit.valor_mensal ?? 0),
         destaque: !!edit.destaque, ativo: edit.ativo ?? true, beneficios: beneficiosText.trim() || null,
       };
+      payload.valor_mensal = valorMensal;
       if (selId) { await api.planos.atualizar(selId, payload); }
       else { await api.planos.criar(payload); }
-      toast.success("Plano salvo"); fetchAll();
+      toast.success("Plano salvo"); await fetchAll();
     } catch (e: any) { toast.error(e.message); }
     setSaving(false);
   };
@@ -119,7 +149,18 @@ export default function EditorPlanos() {
           <div className="flex items-center gap-2"><Edit3 className="size-5" /><h2 className="font-serif text-2xl">{selId ? "Editar Plano" : "Novo Plano"}</h2></div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-muted-foreground">Título</Label><Input maxLength={100} value={edit.titulo ?? ""} onChange={(e) => setEdit({ ...edit, titulo: e.target.value })} /></div>
-            <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-muted-foreground">Custo Mensal (R$)</Label><Input type="number" step="0.01" min="0" value={edit.valor_mensal ?? 0} onChange={(e) => setEdit({ ...edit, valor_mensal: Number(e.target.value) })} /></div>
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Custo Mensal (R$)</Label>
+              <Input
+                inputMode="numeric"
+                minLength={1}
+                required
+                className="pl-3"
+                placeholder="R$ 0,00"
+                value={valorMensalText}
+                onChange={(e) => handleValorMensalChange(e.target.value)}
+              />
+            </div>
           </div>
           <div className="space-y-1.5"><Label className="text-xs uppercase tracking-wider text-muted-foreground">Descrição</Label><Textarea rows={3} maxLength={300} value={edit.descricao ?? ""} onChange={(e) => setEdit({ ...edit, descricao: e.target.value })} /></div>
           <div className="space-y-1.5">
@@ -132,7 +173,7 @@ export default function EditorPlanos() {
             <label className="flex items-center gap-2"><Switch checked={edit.ativo ?? true} onCheckedChange={(v) => setEdit({ ...edit, ativo: v })} /> <span className="text-sm">Ativo</span></label>
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" className="rounded-xl" onClick={() => { const p = planos.find((x) => x.id === selId); if (p) setEdit(p); }}>Descartar</Button>
+            <Button variant="outline" className="rounded-xl" onClick={() => { const p = planos.find((x) => x.id === selId); if (p) { setEdit(p); setValorMensalText(formatCurrency(p.valor_mensal)); setBeneficiosText(toBeneficiosText(p.beneficios)); } }}>Descartar</Button>
             <Button onClick={salvar} disabled={saving} className="rounded-xl">{saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Salvar Plano</Button>
           </div>
         </section>
