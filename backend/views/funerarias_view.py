@@ -16,10 +16,10 @@ class FunerariaCreate(BaseModel):
         description="Telefone no formato (99) 99999-9999 ou 99999-9999"
     )
     email: Optional[EmailStr] = None
-    endereco: Optional[str] = None
+    endereco: Optional[str] = Field(None, max_length=300)
     ativo: Optional[bool] = True
     admin_nome: str = Field(..., min_length=2, max_length=100)
-    admin_password: str
+    admin_password: str = Field(..., min_length=8, max_length=128)
 
 class FunerariaUpdate(BaseModel):
     razao_social: Optional[str] = Field(None, min_length=2, max_length=100)
@@ -34,5 +34,5 @@ class FunerariaUpdate(BaseModel):
         description="Telefone no formato (99) 99999-9999 ou 99999-9999"
     )
     email: Optional[EmailStr] = None
-    endereco: Optional[str] = None
+    endereco: Optional[str] = Field(None, max_length=300)
     ativo: Optional[bool] = None
