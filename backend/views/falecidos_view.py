@@ -12,8 +12,8 @@ class FalecidoCreate(BaseModel):
         pattern=r"^\d{3}\.\d{3}\.\d{3}-\d{2}$",
         description="CPF no formato 000.000.000-00"
     )
-    parentesco: Optional[str] = None
-    observacoes: Optional[str] = None
+    parentesco: Optional[str] = Field(None, max_length=50)
+    observacoes: Optional[str] = Field(None, max_length=500)
 
 class FalecidoUpdate(BaseModel):
     nome: Optional[str] = Field(None, min_length=2, max_length=100)
@@ -24,5 +24,5 @@ class FalecidoUpdate(BaseModel):
         pattern=r"^\d{3}\.\d{3}\.\d{3}-\d{2}$",
         description="CPF no formato 000.000.000-00"
     )
-    parentesco: Optional[str] = None
-    observacoes: Optional[str] = None
+    parentesco: Optional[str] = Field(None, max_length=50)
+    observacoes: Optional[str] = Field(None, max_length=500)
