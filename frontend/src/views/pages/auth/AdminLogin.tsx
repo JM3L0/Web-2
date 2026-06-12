@@ -27,8 +27,14 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanEmail = email.trim();
+    const cleanSenha = senha.trim();
+    if (!cleanEmail || !cleanSenha) {
+      toast.error("Preencha e-mail e senha");
+      return;
+    }
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: cleanSenha });
     if (error) {
       setLoading(false);
       toast.error(error.message === "Invalid login credentials" ? "E-mail ou senha incorretos" : error.message);
