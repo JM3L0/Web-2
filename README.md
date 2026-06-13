@@ -222,12 +222,19 @@ SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
 ### 2. Backend
 
 ```bash
-cd backend
+# Na raiz do projeto (diretório Web-2):
+python3 -m venv venv
+source venv/bin/activate
+
+# Instale as dependências
+pip install -r backend/requirements.txt
+
 # Crie o arquivo backend/.env.local com:
 # SUPABASE_URL=https://seu-projeto.supabase.co
 # SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
-pip install -r requirements.txt
-uvicorn main:app --port 8000 --reload
+
+# Rode o servidor uvicorn a partir da raiz (módulo backend.main)
+uvicorn backend.main:app --port 8000 --reload
 ```
 
 API disponível em `http://127.0.0.1:8000`  
